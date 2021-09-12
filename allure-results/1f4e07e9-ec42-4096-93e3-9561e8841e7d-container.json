@@ -1,0 +1,1 @@
+{"uuid":"1f4e07e9-ec42-4096-93e3-9561e8841e7d","name":"mainProject.loginCases","children":["21a52a40-ea29-49ae-8003-5639a38e3d78"],"befores":[{"name":"login","status":"passed","stage":"finished","description":"","steps":[],"attachments":[],"parameters":[],"start":1631356383568,"stop":1631356406630}],"afters":[],"links":[],"start":1631356383389,"stop":1631356433456}

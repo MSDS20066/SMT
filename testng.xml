@@ -4,11 +4,11 @@
     <test verbose="2" preserve-order="true" name="/home/ahmad/Fabric/Subscriptions">
         <groups>
             <run>
-                <include name="Custom Fields"/>
+                <include name="Plans"/>
             </run>
         </groups>
         <classes>
-            <class name="mainProject.settings"></class>
+            <class name="mainProject.plans"></class>
         </classes>
     </test>
 </suite>

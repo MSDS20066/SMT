@@ -1,5 +1,6 @@
 package mainProject;
 
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.interactions.Actions;
@@ -7,7 +8,6 @@ import org.testng.annotations.Test;
 import org.testng.asserts.SoftAssert;
 import pageObjects.loginPage;
 import pageObjects.plansPage;
-import pageObjects.settingPage;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -48,6 +48,7 @@ public class plans extends base {
         softAssert.assertTrue(plan.getExportPlanButton().isEnabled(),"Export Plans button is missing");
         softAssert.assertTrue(plan.getSearchPlanBox().isEnabled(),"Search Plans input box is missing");
         softAssert.assertTrue(plan.getSearchPlanButton().isEnabled(),"Search Plans button is missing");
+        softAssert.assertAll();
     }
 
     @Test(dependsOnMethods = {"verifyPlansHome"}, groups = {"Plans","Add Plan"})
@@ -66,6 +67,7 @@ public class plans extends base {
         driver.switchTo().defaultContent();
         driver.switchTo().frame(plan.getFrame());
         softAssert.assertTrue(plan.getAddPlanButton().isEnabled(),"Leave without save in warning modal is not working");
+        softAssert.assertAll();
     }
 
     @Test(dependsOnMethods = {"unsavedChangesWarning"}, groups = {"Plans","Add Plan"})
@@ -98,19 +100,59 @@ public class plans extends base {
         if (driver.getCurrentUrl().equals("https://sandbox.copilot.fabric.inc/#/smt/subscriptions/add")){
             plan.getAddPlanPublishButton().click();
         }
+        softAssert.assertAll();
     }
 
     @Test(dependsOnMethods = {"addAndVerifyPlan"}, groups = {"Plans","Plans List"})
     public void verifyPlansSorting(){
         softAssert.assertEquals(plan.getLastCreatedPlan().getText(), prop.getProperty("planTitle"), "Plan is not created OR Plan is not sorted date wise in descending order");
+        softAssert.assertAll();
     }
 
-    @Test(dependsOnMethods = {"addAndVerifyPlan"}, groups = {"Plans","Plans List"})
+    @Test(dependsOnMethods = {"verifyPlansSorting"}, groups = {"Plans","Plans List"})
     public void verifyPlansExporting(){
         softAssert.assertTrue(plan.getExportPlanButton().isEnabled(),"Export Plans button is missing");
         plan.getExportPlanButton().click();
         softAssert.assertAll();
     }
 
+    @Test(dependsOnMethods = {"verifyPlansExporting"}, groups = {"Plans","Plan Detail"})
+    public void verifyPlanDetail(){
+        plan.getLastCreatedPlan().click();
+        softAssert.assertEquals(plan.getPlanDetailTitle().getText(), prop.getProperty("planTitle"), "Plan Title is not accurate");
+        softAssert.assertEquals(plan.getPlanDetailDesc().getText(), prop.getProperty("planDesc"), "Plan Desc is not accurate");
+        softAssert.assertEquals(plan.getPlanDetailFreq().getText(), "Every "+ prop.getProperty("freq") + " weeks", "Plan Frequency is not accurate");
+        softAssert.assertAll();
+    }
+
+
+    @Test(dependsOnMethods = {"verifyPlanDetail"}, groups = {"Plans","Plans List", "Edit Plan"})
+    public void verifyPlansEditingUnsavedChanges() throws InterruptedException {
+        plan.getEditPlanAndCloseButton().click();
+        plan.getPlanTitle().sendKeys(Keys.CONTROL + "A");
+        plan.getPlanTitle().sendKeys(prop.getProperty("editPlanTitle"));
+        plan.getEditPlanAndCloseButton().click();
+        driver.switchTo().activeElement();
+        plan.getUnsavedChangesOKButton().click();
+        driver.switchTo().defaultContent();
+        driver.switchTo().frame(plan.getFrame());
+        softAssert.assertEquals(plan.getPlanDetailTitle().getText(), prop.getProperty("planTitle"), "Edit close button is saving the information");
+        plan.getBackToListButton().click();
+        softAssert.assertAll();
+    }
+
+    @Test(dependsOnMethods = {"verifyPlansEditingUnsavedChanges"}, groups = {"Plans","Plans List", "Edit Plan"})
+    public void verifyPlansEditingSave() throws InterruptedException {
+        plan.getLastCreatedPlan().click();
+        plan.getEditPlanAndCloseButton().click();
+        plan.getPlanTitle().sendKeys(Keys.CONTROL + "A");
+        plan.getPlanTitle().sendKeys(prop.getProperty("editPlanTitle"));
+        softAssert.assertTrue(plan.getEditPlanSaveButton().isDisplayed());
+        plan.getEditPlanSaveButton().click();
+        Thread.sleep(1500);
+        softAssert.assertFalse(plan.getEditPlanAndCloseButton().getText().equals("Cancel"), "Save Button is not working.");
+        plan.getBackToListButton().click();
+        softAssert.assertAll();
+    }
 
 }
